@@ -1,0 +1,13 @@
+[Unit]
+Description=Set Panfrost GPU governor to performance
+After=multi-user.target
+ConditionPathExists=/sys/class/devfreq/fe400000.gpu/governor
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo performance > /sys/class/devfreq/fe400000.gpu/governor'
+ExecStop=/bin/sh -c 'echo simple_ondemand > /sys/class/devfreq/fe400000.gpu/governor'
+
+[Install]
+WantedBy=multi-user.target

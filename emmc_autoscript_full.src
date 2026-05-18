@@ -1,0 +1,56 @@
+#
+# emmc_autoscript_full v3 — AmlBoot
+# ---------------------------------------------------------------------------
+# Compile:
+#   mkimage -C none -A arm -T script -d emmc_autoscript_full.src emmc_autoscript_full
+#
+# Install (grava na factory partition mmc 1:6, "KEYBOX PART" FAT12, 8MB):
+#   mkdir -p /mnt/factory
+#   mount -t vfat -o loop,offset=1029701632,sizelimit=8388608 /dev/mmcblk1 /mnt/factory
+#   cp emmc_autoscript_full /mnt/factory/emmc_autoscript
+#   sync
+#   umount /mnt/factory
+#
+# Como é invocado:
+#   u-boot vendor → bootcmd=run start_autoscript; run storeboot
+#   start_autoscript → run start_emmc_autoscript (após mmc/usb)
+#   start_emmc_autoscript = 'if fatload mmc 1:6 1020000 emmc_autoscript;
+#                             then autoscr 1020000; fi;'
+#   → este script é carregado e executado em u-boot context
+#
+# O que faz:
+#   1. Tenta bootar do eMMC (rota primária — boot autônomo)
+#   2. Se falhar, cai pra USB (rota recovery — pendrive de socorro)
+#
+# Notas:
+#   - mmc 1:15 hex = partição 21 decimal = "super" (Amlogic AML scheme)
+#     coincide com início da FAT32 /boot criada pela MBR Linux @ sector 2764800
+#   - loadaddr é setado pelo u-boot vendor (~0x1000000)
+# ---------------------------------------------------------------------------
+
+echo "=== Custom emmc_autoscript v3: Boot 100% eMMC ==="
+setenv devtype mmc
+setenv devnum 1
+setenv distro_bootpart 15
+setenv cmd_read "fatload mmc 1:15"
+
+if fatload mmc 1:15 ${loadaddr} bootscript; then
+    echo "bootscript carregado do eMMC (mmc 1:15)!"
+    autoscr ${loadaddr}
+else
+    echo "FALHA ao carregar bootscript do eMMC, tentando USB..."
+    usb stop
+    if usb start; then
+        for usbdev in 0 1 2 3; do
+            if fatload usb ${usbdev} ${loadaddr} bootscript; then
+                echo "bootscript encontrado em usb ${usbdev} (fallback)!"
+                setenv devtype usb
+                setenv devnum ${usbdev}
+                setenv distro_bootpart 1
+                setenv cmd_read "fatload usb ${usbdev}:1"
+                autoscr ${loadaddr}
+            fi
+        done
+    fi
+    echo "Nenhum boot encontrado"
+fi
