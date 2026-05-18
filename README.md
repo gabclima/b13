@@ -9,7 +9,7 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 | Arquivo | Pra quê |
 |---|---|
 | **[`TUTORIAL.md`](TUTORIAL.md)** | Procedimento passo a passo replicável em outra B13 |
-| **[`DIARIO.md`](DIARIO.md)** | Diário técnico completo do processo, descobertas, e lições |
+| **[`DIARIO.md`](DIARIO.md)** | Diário técnico completo do processo, descobertas, benchmarks e lições |
 | `scripts/` | Arquivos auxiliares (configs, scripts u-boot, sketch ESP32) |
 
 ## Quem deve usar isso
@@ -20,20 +20,34 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 
 ## Status
 
-- ✅ Boot autônomo do eMMC funcionando
+- ✅ Boot autônomo do eMMC funcionando (~5 segundos)
 - ✅ XFCE com aceleração GPU otimizado
-- ✅ Ethernet, SSH, HDMI, áudio
-- ❌ WiFi (chip MT7668, requer DTB específico)
+- ✅ Ethernet, SSH, HDMI
+- ✅ Benchmarks confirmam: térmica boa (51-58°C sob stress), rede satura 100M, eMMC midrange
+- ❌ WiFi (chip Unisoc UWE5621DS, driver mainline ausente)
+- ❌ Bluetooth (mesmo chip, mesma situação — controle remoto da B13 é BT, não funciona)
+- ❌ Áudio HDMI (driver meson-aiu parcial)
 - 🚧 Versão 2: pendrive auto-installer (sem UART) — em desenvolvimento
 
 ## Hardware testado
 
 | | |
 |---|---|
-| TV Box | BTV B13 |
-| SoC | Amlogic S905X4 (SC2) |
-| RAM | 2 GB |
-| Storage | 16 GB eMMC |
+| TV Box | BTV B13 ("OTT BOX") |
+| Versão da placa | B13_V1.0_20220406 |
+| SoC | Amlogic S905X4 (SC2, codename `ohm`) |
+| CPU | 4× Cortex-A55 @ até 2.0 GHz |
+| GPU | Mali-G31 MP2 (Panfrost) |
+| RAM | 2 GB DDR4 |
+| Storage | 16 GB eMMC Samsung KLMAG1JETD |
+| Ethernet | 100 Mbps (hardware limit) |
+| WiFi/BT | Unisoc UWE5621DS (não funciona no Debian mainline) |
+
+## Casos de uso
+
+✅ **Servidor ARM low-power:** Pi-hole, Home Assistant, MQTT, SSH bastion, automação, K3s node
+🟡 **Desktop leve:** terminal, editor de texto, configuração
+❌ **Desktop pesado:** navegador moderno, vídeo, transcoding — CPU/decode insuficientes
 
 ## Créditos
 
