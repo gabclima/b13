@@ -106,7 +106,7 @@ box=s905x4_generic
 2. Plugue o pendrive em uma porta USB. Na B13 funciona tanto na USB 2.0 quanto na USB 3.0 — testei o procedimento todo na 3.0 sem problema
 3. Plugue teclado e monitor HDMI
 4. **Vire a TV box de cabeça pra baixo.** Embaixo tem dois furos com texto em alto relevo no plástico: **RESET** e **UPDATE**. Usaremos o **UPDATE**
-5. Pegue o toothpick (ou alfinete, agulha, jumper macho, chavinha SIM...) e enfie no furo do **UPDATE**. O botão fica ~1.5 cm pra dentro. Se preferir, abre a carcaça (sem parafuso, é encaixe) e aperta direto com o dedo
+5. Pegue o toothpick (ou alfinete, agulha, jumper macho, chavinha SIM...) e enfie no furo do **UPDATE**. O botão fica ~1.5 cm pra dentro. Se preferir, abre a carcaça, são 4 parafusos, e aperta direto com o dedo
 6. **Segure o botão UPDATE pressionado** e ligue a B13 na tomada
 7. Continue segurando por 7-10 segundos depois de ligar
 8. Solte. Debian deve começar a bootar do pendrive
