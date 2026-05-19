@@ -45,9 +45,9 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 
 ## Casos de uso
 
-✅ **Servidor ARM low-power:** Pi-hole, Home Assistant, MQTT, SSH bastion, automação, K3s node
-🟡 **Desktop leve:** terminal, editor de texto, configuração
-❌ **Desktop pesado:** navegador moderno, vídeo, transcoding — CPU/decode insuficientes
+- ✅ **Servidor ARM low-power:** Pi-hole, Home Assistant, MQTT, SSH bastion, automação, K3s node
+- 🟡 **Desktop leve:** terminal, editor de texto, configuração
+- ❌ **Desktop pesado:** navegador moderno, vídeo, transcoding — CPU/decode insuficientes
 
 ## Créditos
 
