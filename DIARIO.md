@@ -219,7 +219,7 @@ ESP32 GPIO17  ─── BTV RX    (UART2 TX do ESP32 envia pra BTV)
 3.3V logic em ambos os lados — conexão direta, sem level shifter.
 
 <img src="imagens/esp32uart.jpg" width="600" alt="Setup completo do hacking via UART">
-*Setup em ação: a B13 ligada (LEDs frontais POWER vermelho e IR verde acesos) com a tampa removida, expondo a placa azul. Jumpers (roxo, branco, lilás) saem dos pinos UART soldados na placa e vão até o ESP32 dev board no canto inferior direito. O ESP32 vai conectado via USB ao PC, virando bridge USB-Serial.*
+*Setup em ação: a B13 ligada (LEDs frontais POWER vermelho e IR verde acesos) com a tampa removida, expondo a placa azul. Jumpers (azul, cinza, roxo) saem dos pinos UART soldados na placa e vão até o ESP32 dev board no canto inferior direito. O ESP32 vai conectado via USB ao PC, virando bridge USB-Serial.*
 
 Baud: 115200 8N1.
 
