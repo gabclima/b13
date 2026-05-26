@@ -282,8 +282,8 @@ RX
 3V3
 ```
 
-<img src="imagens/soldab13.jpg" width="500" alt="Pads UART originais antes da solda">
-*Foi assim que os pads vieram de fábrica — 4 furos rotulados, sem pinos.*
+<img src="imagens/soldab13.jpg" width="500" alt="Pads UART com solda aplicada">
+*Close-up dos 4 pads UART com solda aplicada nos furos (ainda sem os pinos macho instalados). Ordem de cima pra baixo: GND, TX, RX, 3V3.*
 
 Como vêm só com furos (sem pinos), você precisa **soldar pinos macho** (header de 4 pinos, mesmo padrão de Arduino) pra conseguir conectar jumpers do ESP32. Ferro de solda + estanho. Operação de 5 minutos.
 

@@ -108,19 +108,19 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 
 <table>
 <tr>
-<th width="33%">Pads originais</th>
-<th width="33%">Após solda</th>
+<th width="33%">Pads com solda</th>
+<th width="33%">Pinos instalados</th>
 <th width="34%">Setup completo</th>
 </tr>
 <tr>
-<td align="center"><img src="imagens/soldab13.jpg" width="260" alt="Pads UART"></td>
-<td align="center"><img src="imagens/pinossoldadosb13.jpg" width="260" alt="Pinos soldados"></td>
+<td align="center"><img src="imagens/soldab13.jpg" width="260" alt="Pads UART com solda"></td>
+<td align="center"><img src="imagens/pinossoldadosb13.jpg" width="260" alt="Pinos instalados"></td>
 <td align="center"><img src="imagens/esp32uart.jpg" width="260" alt="Setup ESP32"></td>
 </tr>
 <tr>
-<td>4 pads UART expostos: GND/TX/RX/3V3</td>
-<td>Pinos macho header soldados</td>
-<td>B13 ligada conectada ao ESP32</td>
+<td>Close-up dos 4 pads UART (GND/TX/RX/3V3) com solda aplicada</td>
+<td>Pinos macho header soldados nos pads</td>
+<td>B13 ligada conectada ao ESP32 via jumpers</td>
 </tr>
 </table>
 

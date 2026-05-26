@@ -206,7 +206,7 @@ O u-boot vendor proprietário da Amlogic não consegue bootar Linux do eMMC porq
 A B13 tem **4 pads UART expostos na placa** (NÃO 5): `GND`, `TX`, `RX`, `3V3`, em coluna do lado das portas USB. Vieram só com furos pra solda — tive que soldar pinos macho pra conectar jumpers.
 
 <img src="imagens/soldab13.jpg" width="600" alt="Pads UART em close-up">
-*Close-up dos 4 pads UART na placa B13 (próximos ao slot microSD). A serigrafia confirma a ordem de cima pra baixo: GND, TX, RX, 3V3. Esses são os furos a serem soldados.*
+*Close-up dos 4 pads UART na placa B13 (próximos ao slot microSD), aqui já com solda aplicada nos furos. A serigrafia confirma a ordem de cima pra baixo: GND, TX, RX, 3V3.*
 
 O ESP32 vira bridge USB-Serial:
 
