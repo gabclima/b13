@@ -69,7 +69,8 @@ Codename interno do firmware Android/u-boot: **`ohm`**.
 | RAM | 2 GB DDR4 (chip Rayson RS512M32LM4 = 512Mx32 = 16 Gb) |
 | Storage | 16 GB eMMC **Samsung KLMAG1JETD-B041** (chip físico Samsung; o controlador reporta-se como "Biwin" via mmc CID — provavelmente Biwin remarca/integra Samsung) |
 | Ethernet | **100 Mbps** via PHY interno do SoC (kernel reporta "Meson G12A Internal PHY"), magnetic externo TF1102 (NetSol). **Sem PHY gigabit externo** — hardware 100M only, mesmo que listings online digam o contrário |
-| WiFi/BT | **Unisoc UWE5621DS** — chip combo WiFi 2.4/5GHz IEEE 802.11 a/b/g/n/ac + Bluetooth 5.1, conexão SDIO (NÃO é MediaTek MT7668 como diagnosticado inicialmente) |
+| WiFi/BT | **Unisoc UWE5621DS** — chip combo WiFi 2.4/5GHz IEEE 802.11 a/b/g/n/ac + Bluetooth (oficialmente 5.1, mas o vendor BTV reporta como Bluetooth 4+ no Android — features BT 5.x não habilitadas), conexão SDIO (NÃO é MediaTek MT7668 como diagnosticado inicialmente) |
+| LEDs frontais | 3 LEDs na carcaça: **POWER** (vermelho), **NET**, **IR** (verde) — feedback visual do estado da TV box |
 | HDMI | HDMI 2.0a, suporta 4K@60Hz, HDCP 2.3 |
 | Áudio | HDMI out + S/PDIF óptico + jack 3.5mm (AV 3-em-1) |
 | USB | 1× USB 3.0 + 1× USB 2.0 (marcada "OTG" na serigrafia, mas funciona como host normal pra pendrive) |
@@ -79,7 +80,21 @@ Codename interno do firmware Android/u-boot: **`ohm`**.
 | UART de fábrica | **4 pads expostos na placa**: GND, TX, RX, 3V3 (em coluna, lado dos USBs) |
 | EMI shield | Cobertura metálica grande sobre SoC + RAM no verso da placa. Por sorte serve como dissipador passivo |
 
-**Capabilities detectadas pelo AIDA64 no Android original:** `audio.output`, `bluetooth`, `bluetooth_le`, `camera.any`, `camera.external`, `consumerir` (sensor IR físico existe na placa, embora o controle remoto da B13 use BT), `ethernet`, `gamepad`, `hdmi.cec`, `location`, `location.network`, `opengles.aep`, `ram.normal`.
+![Placa B13 pelo verso identificando chips](imagens/b13-placa-verso.png)
+*Placa B13_V1.0 pelo verso: chip SoC central, Unisoc UWE5621DS (módulo verde à direita) com cristal 24 MHz, RAM Rayson DDR4, eMMC Samsung KLMAG1JETD, magnetic TF1102 próximo ao RJ45, pads UART em coluna (GND/TX/RX/3V3) ao lado das USBs. Lote QL2247.*
+
+![Placa B13 pela frente com EMI shield](imagens/b13-placa-frente.png)
+*Mesma placa pela frente. EMI shield metálico grande cobre o SoC (lado oposto do verso). Botões SMD com serigrafia REBOOT (esquerda) e UPDATE (direita) — corresponde aos furos da carcaça. Etiqueta interna: `SLK-AK-3212L B13 MAIN` / `S905X4 16741`.*
+
+**Capabilities detectadas pelo AIDA64 no Android original:** `audio.output`, `bluetooth`, `bluetooth_le`, `camera.any`, `camera.external`, `consumerir` (capability confirmada — sensor IR físico existe no SoC; controle remoto da B13 é BT, mas o IR poderia ser usado por outros controles/projetos), `ethernet`, `gamepad`, `hdmi.cec`, `location`, `location.network`, `opengles.aep`, **`ram.normal`** (Android trata a B13 como dispositivo de RAM normal, não low-RAM).
+
+![AIDA64 confirmando codename ohm e plataforma sc2](imagens/aida64-b13-sistema.png)
+*AIDA64 confirma: modelo B13, placa/dispositivo/produto `ohm`, hardware `amlogic`, plataforma `sc2`. RAM física 2 GB, eMMC visível ao Android 11.36 GB (de 16 GB físicos; ~4.6 GB são partições vendor ocultas). Bluetooth reporta como "4+".*
+
+![AIDA64 processador](imagens/aida64-b13-processador.png)
+*4× Cortex-A55 @ 2004 MHz, rev r2p0, ARMv8-A 64-bit. Governor schedutil dinâmico (100-2004 MHz). Crypto hardware-accelerated: AES, ASIMD/NEON, PMULL, SHA1, SHA2 — relevante pra cargas com TLS, WireGuard, dm-crypt, etc.*
+
+> **Observação sobre Mali cores no AIDA64:** a ferramenta reporta "GPU Cores: 1" tanto para B13 quanto E13. Isso não significa que ambas têm MP1. O S905X4 (B13) oficialmente carrega Mali-G31 **MP2** (2 shader cores Bifrost) enquanto o S905W2 (E13) é MP1. AIDA64 parece não distinguir shader cores em GPUs Mali Bifrost da família Amlogic — possível limitação da ferramenta.
 
 ### Modelo secundário: BTV E13
 
@@ -190,6 +205,9 @@ O u-boot vendor proprietário da Amlogic não consegue bootar Linux do eMMC porq
 
 A B13 tem **4 pads UART expostos na placa** (NÃO 5): `GND`, `TX`, `RX`, `3V3`, em coluna do lado das portas USB. Vieram só com furos pra solda — tive que soldar pinos macho pra conectar jumpers.
 
+![Pads UART em close-up](imagens/b13-uart-pads-detalhe.jpg)
+*Close-up dos 4 pads UART na placa B13 (próximos ao slot microSD). A serigrafia confirma a ordem de cima pra baixo: GND, TX, RX, 3V3. Esses são os furos a serem soldados.*
+
 O ESP32 vira bridge USB-Serial:
 
 ```
@@ -199,6 +217,9 @@ ESP32 GPIO17  ─── BTV RX    (UART2 TX do ESP32 envia pra BTV)
 ```
 
 3.3V logic em ambos os lados — conexão direta, sem level shifter.
+
+![Setup completo do hacking via UART](imagens/setup-esp32-uart-bridge.jpg)
+*Setup em ação: a B13 ligada (LEDs frontais POWER vermelho e IR verde acesos) com a tampa removida, expondo a placa azul. Jumpers (roxo, branco, lilás) saem dos pinos UART soldados na placa e vão até o ESP32 dev board no canto inferior direito. O ESP32 vai conectado via USB ao PC, virando bridge USB-Serial.*
 
 Baud: 115200 8N1.
 
@@ -471,6 +492,9 @@ Numa virada inesperada: tinha um mouse gamer "LXDDZ 2.4G 8K HS Receiver" plugado
 
 Mesmo limitando o mouse a 500 Hz via firmware no PC, ainda incomodava (4 endpoints HID continuam). Solução: usar mouse comum (Compx 2.4G 125 Hz) e ponto.
 
+![AIDA64 reconhecendo o mouse Compx](imagens/aida64-b13-usb.png)
+*AIDA64 no Android original confirma o substituto: "Compx 2.4G Wireless Receiver" (ID `3554-FA09`, USB 2.0 a 12 Mbps full-speed, 98 mA). Polling baixo, 1 endpoint HID — exatamente o oposto do gamer 8K. O kernel Android é 5.4.180 (vs 6.18 mainline no Debian).*
+
 ### 6.8 Estado final XFCE
 
 | Métrica | Antes | Depois |
@@ -490,6 +514,9 @@ Durante o benchmark térmico, descobri que o EMI shield (a chapa metálica grand
 Esse gap é comum em TV box pirata: o shield é projetado primariamente pra blindagem eletromagnética (compliance FCC/CE), não pra dissipação. A fábrica não coloca thermal pad porque encarece.
 
 **Upgrade recomendado pra uso 24/7:** thermal pad fino (1-1.5mm, R$15-25) entre o SoC e o shield. Esperado: estabilizar em ~45-50°C mesmo sob stress 100%. Vai melhorar a vida útil do eMMC e do SoC.
+
+![EMI shield da B13](imagens/b13-placa-frente.png)
+*Vista frontal da placa B13. O EMI shield metálico retangular grande no centro cobre exatamente a área do SoC (lado oposto do verso). Apertar manualmente esse shield contra o SoC já reduziu 7°C; colar um thermal pad de 1-1.5mm preenche a folga permanentemente.*
 
 ---
 
@@ -639,6 +666,9 @@ Comparação útil pra quem quer reciclar uma B13 sem expectativas erradas:
 ## 10. Android vs Debian — o que se ganha e o que se perde
 
 A pergunta natural ao reciclar: "no Android funciona tudo e roda 4K, no Debian engasga até no YouTube. Por quê?" A resposta: **mesmo hardware, stacks de software completamente diferentes**.
+
+![AIDA64 driver GPU Mali r25p1](imagens/aida64-b13-gpu.png)
+*AIDA64 mostra o driver Mali no Android original: versão `r25p1-01bet0`, OpenGL ES 3.2, com extensões `GL_ARM_mali_shader_binary` (shader binário Mali nativo) e `GL_OES_EGL_image_external` (zero-copy entre decoder de vídeo V4L2 e GPU — essencial pra reprodução 4K sem encostar a CPU). No Debian mainline, ganhamos OpenGL ES 3.1 via Panfrost (open-source) — perdemos a integração com V4L2 e algumas extensões proprietárias.*
 
 | Aspecto | Android (vendor BTV) | Debian (nosso setup) |
 |---|---|---|

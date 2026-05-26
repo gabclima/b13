@@ -1,3 +1,12 @@
+<!-- ============================================================
+     README.md ATUALIZADO — pronto pra substituir o atual no repo
+     - Hero image no topo
+     - Galeria de fotos + AIDA64 no final
+     - Correção Bluetooth: 4+ no Android (era 5.1)
+     ============================================================ -->
+
+![BTV B13](imagens/b13-carcaca-topo.png)
+
 # AmlBoot B13
 
 > Debian 13 autônomo no eMMC interno de uma BTV B13 (Amlogic S905X4).
@@ -10,12 +19,13 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 |---|---|
 | **[`TUTORIAL.md`](TUTORIAL.md)** | Procedimento passo a passo replicável em outra B13 |
 | **[`DIARIO.md`](DIARIO.md)** | Diário técnico completo do processo, descobertas, benchmarks e lições |
-| `scripts/` | Arquivos auxiliares (configs, scripts u-boot, sketch ESP32) |
+| `imagens/` | Fotos do hardware (carcaça, placa) e screenshots AIDA64 |
+| Demais arquivos | Configs e scripts auxiliares (u-boot scripts, sketch ESP32, systemd unit, Xorg conf) |
 
 ## Quem deve usar isso
 
-- **Tem uma BTV B13** (S905X4) e quer rodar Linux nela → ver `TUTORIAL.md`
-- **Quer entender como foi feito** → ver `DIARIO.md`
+- **Tem uma BTV B13** (S905X4) e quer rodar Linux nela → ver [`TUTORIAL.md`](TUTORIAL.md)
+- **Quer entender como foi feito** → ver [`DIARIO.md`](DIARIO.md)
 - **Quer adaptar pra outro modelo de TV box Amlogic** → ambos
 
 ## Status
@@ -35,19 +45,48 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 |---|---|
 | TV Box | BTV B13 ("OTT BOX") |
 | Versão da placa | B13_V1.0_20220406 |
-| SoC | Amlogic S905X4 (SC2, codename `ohm`) |
-| CPU | 4× Cortex-A55 @ até 2.0 GHz |
-| GPU | Mali-G31 MP2 (Panfrost) |
-| RAM | 2 GB DDR4 |
-| Storage | 16 GB eMMC Samsung KLMAG1JETD |
-| Ethernet | 100 Mbps (hardware limit) |
-| WiFi/BT | Unisoc UWE5621DS (não funciona no Debian mainline) |
+| SoC | Amlogic S905X4 (família SC2, codename `ohm`) |
+| CPU | 4× Cortex-A55 @ até 2.0 GHz (rev r2p0) |
+| GPU | Mali-G31 MP2 (driver Panfrost no Debian) |
+| RAM | 2 GB DDR4 (chip Rayson RS512M32LM4) |
+| Storage | 16 GB eMMC Samsung KLMAG1JETD (11.36 GB úteis no Android) |
+| Ethernet | 100 Mbps (PHY interno SoC, hardware limit) |
+| WiFi/BT | Unisoc UWE5621DS (BT 4+ no Android; não funciona no Debian mainline) |
+| Áudio | HDMI + S/PDIF óptico + jack 3.5mm AV |
+| Controle remoto | Bluetooth |
 
 ## Casos de uso
 
 - ✅ **Servidor ARM low-power:** Pi-hole, Home Assistant, MQTT, SSH bastion, automação, K3s node
 - 🟡 **Desktop leve:** terminal, editor de texto, configuração
 - ❌ **Desktop pesado:** navegador moderno, vídeo, transcoding — CPU/decode insuficientes
+
+## Galeria
+
+### Hardware
+
+| Externo | Interno |
+|---|---|
+| ![Carcaça topo](imagens/b13-carcaca-topo.png) | ![Placa verso](imagens/b13-placa-verso.png) |
+| Topo da B13 (carcaça branca, logo btv) | Placa pelo verso identificando chips: SoC central, Unisoc UWE5621DS (WiFi/BT) à direita, RAM Rayson DDR4, eMMC Samsung KLMAG1JETD, magnetic TF1102, pads UART 4 pinos (GND/TX/RX/3V3) |
+| ![Carcaça verso](imagens/b13-carcaca-verso.png) | ![Placa frente](imagens/b13-placa-frente.png) |
+| Verso da carcaça com furos RESET e UPDATE | Placa pela frente com EMI shield metálico sobre o SoC, botões internos REBOOT e UPDATE |
+
+### Confirmação do hardware via AIDA64 (no Android original)
+
+| | |
+|---|---|
+| ![AIDA64 Sistema](imagens/aida64-b13-sistema.png) | ![AIDA64 Processador](imagens/aida64-b13-processador.png) |
+| **Sistema:** modelo B13, codename `ohm`, plataforma `sc2`, capabilities Android | **Processador:** 4× Cortex-A55 @ 2004 MHz, rev r2p0, governor schedutil, crypto AES/NEON/PMULL/SHA |
+| ![AIDA64 GPU](imagens/aida64-b13-gpu.png) | ![AIDA64 USB](imagens/aida64-b13-usb.png) |
+| **GPU:** Mali-G31, driver vendor r25p1, OpenGL ES 3.2 | **USB:** kernel Android 5.4.180, mouse Compx 2.4G enxergado a 12 Mbps |
+
+### Processo de hardware hacking (acesso ao UART vendor)
+
+| Pads originais | Após solda | Setup completo |
+|---|---|---|
+| ![Pads UART](imagens/b13-uart-pads-detalhe.jpg) | ![Pinos soldados](imagens/b13-uart-pinos-soldados.jpg) | ![Setup ESP32](imagens/setup-esp32-uart-bridge.jpg) |
+| 4 pads UART expostos: GND/TX/RX/3V3 | Pinos macho header soldados | B13 ligada conectada ao ESP32 |
 
 ## Créditos
 
