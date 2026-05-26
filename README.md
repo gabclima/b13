@@ -5,7 +5,7 @@
      - Correção Bluetooth: 4+ no Android (era 5.1)
      ============================================================ -->
 
-![BTV B13](imagens/b13-carcaca-topo.png)
+![BTV B13](imagens/topo.png)
 
 # AmlBoot B13
 
@@ -67,25 +67,25 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 
 | Externo | Interno |
 |---|---|
-| ![Carcaça topo](imagens/b13-carcaca-topo.png) | ![Placa verso](imagens/b13-placa-verso.png) |
+| ![Carcaça topo](imagens/topo.png) | ![Placa verso](imagens/placafundo.png) |
 | Topo da B13 (carcaça branca, logo btv) | Placa pelo verso identificando chips: SoC central, Unisoc UWE5621DS (WiFi/BT) à direita, RAM Rayson DDR4, eMMC Samsung KLMAG1JETD, magnetic TF1102, pads UART 4 pinos (GND/TX/RX/3V3) |
-| ![Carcaça verso](imagens/b13-carcaca-verso.png) | ![Placa frente](imagens/b13-placa-frente.png) |
+| ![Carcaça verso](imagens/fundo.png) | ![Placa frente](imagens/placafrente.png) |
 | Verso da carcaça com furos RESET e UPDATE | Placa pela frente com EMI shield metálico sobre o SoC, botões internos REBOOT e UPDATE |
 
 ### Confirmação do hardware via AIDA64 (no Android original)
 
 | | |
 |---|---|
-| ![AIDA64 Sistema](imagens/aida64-b13-sistema.png) | ![AIDA64 Processador](imagens/aida64-b13-processador.png) |
+| ![AIDA64 Sistema](imagens/sistemab13.png) | ![AIDA64 Processador](imagens/processadorb13.png) |
 | **Sistema:** modelo B13, codename `ohm`, plataforma `sc2`, capabilities Android | **Processador:** 4× Cortex-A55 @ 2004 MHz, rev r2p0, governor schedutil, crypto AES/NEON/PMULL/SHA |
-| ![AIDA64 GPU](imagens/aida64-b13-gpu.png) | ![AIDA64 USB](imagens/aida64-b13-usb.png) |
+| ![AIDA64 GPU](imagens/telab13.png) | ![AIDA64 USB](imagens/dispositivosb13.png) |
 | **GPU:** Mali-G31, driver vendor r25p1, OpenGL ES 3.2 | **USB:** kernel Android 5.4.180, mouse Compx 2.4G enxergado a 12 Mbps |
 
 ### Processo de hardware hacking (acesso ao UART vendor)
 
 | Pads originais | Após solda | Setup completo |
 |---|---|---|
-| ![Pads UART](imagens/b13-uart-pads-detalhe.jpg) | ![Pinos soldados](imagens/b13-uart-pinos-soldados.jpg) | ![Setup ESP32](imagens/setup-esp32-uart-bridge.jpg) |
+| ![Pads UART](imagens/soldab13.jpg) | ![Pinos soldados](imagens/pinossoldadosb13.jpg) | ![Setup ESP32](imagens/esp32uart.jpg) |
 | 4 pads UART expostos: GND/TX/RX/3V3 | Pinos macho header soldados | B13 ligada conectada ao ESP32 |
 
 ## Créditos

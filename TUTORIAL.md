@@ -47,8 +47,8 @@ Alternativa sem abrir: instala o app **AIDA64** pela Play Store no Android origi
 
 Referência de como devem aparecer no AIDA64:
 
-![AIDA64 Sistema esperado](imagens/aida64-b13-sistema.png)
-![AIDA64 Processador esperado](imagens/aida64-b13-processador.png)
+![AIDA64 Sistema esperado](imagens/sistemab13.png)
+![AIDA64 Processador esperado](imagens/processadorb13.png)
 
 ### 0.2 Faça o backup do Android (CRÍTICO)
 
@@ -112,7 +112,7 @@ box=s905x4_generic
 3. Plugue teclado e monitor HDMI
 4. **Vire a TV box de cabeça pra baixo.** Embaixo tem dois furos com texto em alto relevo no plástico: **RESET** e **UPDATE**. Usaremos o **UPDATE**
 
-   ![Verso da carcaça mostrando RESET e UPDATE](imagens/b13-carcaca-verso.png)
+   ![Verso da carcaça mostrando RESET e UPDATE](imagens/fundo.png)
    *Vista da parte de baixo da B13. Os dois furos pequenos (~2mm) estão nos cantos inferiores: RESET à esquerda, UPDATE à direita. Os 4 furos maiores nos cantos são pra parafusos da carcaça.*
 5. Pegue o toothpick (ou alfinete, agulha, jumper macho, chavinha SIM...) e enfie no furo do **UPDATE**. O botão fica ~1.5 cm pra dentro. Se preferir, abre a carcaça (sem parafuso, é encaixe) e aperta direto com o dedo
 6. **Segure o botão UPDATE pressionado** e ligue a B13 na tomada
@@ -282,12 +282,12 @@ RX
 3V3
 ```
 
-![Pads UART originais antes da solda](imagens/b13-uart-pads-detalhe.jpg)
+![Pads UART originais antes da solda](imagens/soldab13.jpg)
 *Foi assim que os pads vieram de fábrica — 4 furos rotulados, sem pinos.*
 
 Como vêm só com furos (sem pinos), você precisa **soldar pinos macho** (header de 4 pinos, mesmo padrão de Arduino) pra conseguir conectar jumpers do ESP32. Ferro de solda + estanho. Operação de 5 minutos.
 
-![Pinos macho header soldados nos pads UART](imagens/b13-uart-pinos-soldados.jpg)
+![Pinos macho header soldados nos pads UART](imagens/pinossoldadosb13.jpg)
 *Depois da solda: os 4 pinos macho ficam pra cima, prontos pra receber jumpers fêmea-fêmea ou fêmea-macho. A solda não precisa ser estética — só elétrica. Note o botão UPDATE serigrafado logo acima dos pinos.*
 
 ### 5.2 Setup do ESP32 como adaptador UART
@@ -309,7 +309,7 @@ ESP32 GPIO17  ─── BTV RX
 2. Abra Serial Monitor a **115200 baud**
 3. Ligue a B13 — vai aparecer o log de boot do u-boot vendor
 
-![Setup do hacking funcionando](imagens/setup-esp32-uart-bridge.jpg)
+![Setup do hacking funcionando](imagens/esp32uart.jpg)
 *Setup esperado quando tudo está conectado: B13 com a tampa removida, jumpers ligando UART da placa ao ESP32, ESP32 conectado ao PC via USB. Os LEDs frontais POWER (vermelho) e IR (verde) acesos confirmam que a B13 está alimentada e rodando.*
 4. Quando aparecer `Hit any key to stop autoboot:`, digite qualquer tecla **rapidamente** (a janela é de milissegundos — se a janela for muito curta, use a versão Auto-Intercept v2 do sketch comentada no .ino)
 5. Vai cair no prompt `sc2_ah212#`
