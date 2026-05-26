@@ -1,11 +1,6 @@
-<!-- ============================================================
-     README.md ATUALIZADO — pronto pra substituir o atual no repo
-     - Hero image no topo
-     - Galeria de fotos + AIDA64 no final
-     - Correção Bluetooth: 4+ no Android (era 5.1)
-     ============================================================ -->
-
-![BTV B13](imagens/topo.png)
+<p align="center">
+  <img src="imagens/topo.png" width="320" alt="BTV B13">
+</p>
 
 # AmlBoot B13
 
@@ -65,28 +60,69 @@ Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian 1
 
 ### Hardware
 
-| Externo | Interno |
-|---|---|
-| ![Carcaça topo](imagens/topo.png) | ![Placa verso](imagens/placafundo.png) |
-| Topo da B13 (carcaça branca, logo btv) | Placa pelo verso identificando chips: SoC central, Unisoc UWE5621DS (WiFi/BT) à direita, RAM Rayson DDR4, eMMC Samsung KLMAG1JETD, magnetic TF1102, pads UART 4 pinos (GND/TX/RX/3V3) |
-| ![Carcaça verso](imagens/fundo.png) | ![Placa frente](imagens/placafrente.png) |
-| Verso da carcaça com furos RESET e UPDATE | Placa pela frente com EMI shield metálico sobre o SoC, botões internos REBOOT e UPDATE |
+<table>
+<tr>
+<th width="50%">Externo</th>
+<th width="50%">Interno</th>
+</tr>
+<tr>
+<td align="center"><img src="imagens/topo.png" width="350" alt="Carcaça topo"></td>
+<td align="center"><img src="imagens/placafundo.png" width="350" alt="Placa verso"></td>
+</tr>
+<tr>
+<td>Topo da B13 (carcaça branca, logo btv)</td>
+<td>Placa pelo verso identificando chips: SoC central, Unisoc UWE5621DS (WiFi/BT) à direita, RAM Rayson DDR4, eMMC Samsung KLMAG1JETD, magnetic TF1102, pads UART 4 pinos (GND/TX/RX/3V3)</td>
+</tr>
+<tr>
+<td align="center"><img src="imagens/fundo.png" width="350" alt="Carcaça verso"></td>
+<td align="center"><img src="imagens/placafrente.png" width="350" alt="Placa frente"></td>
+</tr>
+<tr>
+<td>Verso da carcaça com furos RESET e UPDATE</td>
+<td>Placa pela frente com EMI shield metálico sobre o SoC, botões internos REBOOT e UPDATE</td>
+</tr>
+</table>
 
 ### Confirmação do hardware via AIDA64 (no Android original)
 
-| | |
-|---|---|
-| ![AIDA64 Sistema](imagens/sistemab13.png) | ![AIDA64 Processador](imagens/processadorb13.png) |
-| **Sistema:** modelo B13, codename `ohm`, plataforma `sc2`, capabilities Android | **Processador:** 4× Cortex-A55 @ 2004 MHz, rev r2p0, governor schedutil, crypto AES/NEON/PMULL/SHA |
-| ![AIDA64 GPU](imagens/telab13.png) | ![AIDA64 USB](imagens/dispositivosb13.png) |
-| **GPU:** Mali-G31, driver vendor r25p1, OpenGL ES 3.2 | **USB:** kernel Android 5.4.180, mouse Compx 2.4G enxergado a 12 Mbps |
+<table>
+<tr>
+<td align="center" width="50%"><img src="imagens/sistemab13.png" width="400" alt="AIDA64 Sistema"></td>
+<td align="center" width="50%"><img src="imagens/processadorb13.png" width="400" alt="AIDA64 Processador"></td>
+</tr>
+<tr>
+<td><b>Sistema:</b> modelo B13, codename <code>ohm</code>, plataforma <code>sc2</code>, capabilities Android</td>
+<td><b>Processador:</b> 4× Cortex-A55 @ 2004 MHz, rev r2p0, governor schedutil, crypto AES/NEON/PMULL/SHA</td>
+</tr>
+<tr>
+<td align="center"><img src="imagens/telab13.png" width="400" alt="AIDA64 GPU"></td>
+<td align="center"><img src="imagens/dispositivosb13.png" width="400" alt="AIDA64 USB"></td>
+</tr>
+<tr>
+<td><b>GPU:</b> Mali-G31, driver vendor r25p1, OpenGL ES 3.2</td>
+<td><b>USB:</b> kernel Android 5.4.180, mouse Compx 2.4G enxergado a 12 Mbps</td>
+</tr>
+</table>
 
 ### Processo de hardware hacking (acesso ao UART vendor)
 
-| Pads originais | Após solda | Setup completo |
-|---|---|---|
-| ![Pads UART](imagens/soldab13.jpg) | ![Pinos soldados](imagens/pinossoldadosb13.jpg) | ![Setup ESP32](imagens/esp32uart.jpg) |
-| 4 pads UART expostos: GND/TX/RX/3V3 | Pinos macho header soldados | B13 ligada conectada ao ESP32 |
+<table>
+<tr>
+<th width="33%">Pads originais</th>
+<th width="33%">Após solda</th>
+<th width="34%">Setup completo</th>
+</tr>
+<tr>
+<td align="center"><img src="imagens/soldab13.jpg" width="260" alt="Pads UART"></td>
+<td align="center"><img src="imagens/pinossoldadosb13.jpg" width="260" alt="Pinos soldados"></td>
+<td align="center"><img src="imagens/esp32uart.jpg" width="260" alt="Setup ESP32"></td>
+</tr>
+<tr>
+<td>4 pads UART expostos: GND/TX/RX/3V3</td>
+<td>Pinos macho header soldados</td>
+<td>B13 ligada conectada ao ESP32</td>
+</tr>
+</table>
 
 ## Créditos
 
