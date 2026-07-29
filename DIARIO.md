@@ -934,4 +934,146 @@ fio --name=test --rw=randread --bs=4k --size=512M --filename=/root/test --runtim
 
 ---
 
-*Fim do diário v2.0.*
+## 16. Sessão v2.0 — o método sem-UART, na prática (jul/2026)
+
+Esta seção documenta a implementação real da "Versão 2" que a §13.1 tinha
+deixado como plano. O resultado: **boot autônomo do eMMC sem UART, sem soldar
+nada**, validado numa segunda BTV B13. No caminho, três descobertas importantes.
+
+### 16.1 Descoberta central: existem DUAS variantes de firmware vendor da B13
+
+Testando numa segunda unidade (comprada/recebida depois da primeira), o método
+documentado simplesmente **não funcionou** — a placa travava na logo depois de
+configurar o env. A causa demorou a aparecer porque o sintoma (trava na logo)
+era o mesmo de vários outros problemas.
+
+Lendo o env real gravado no eMMC (sem UART, direto do Linux):
+
+```bash
+dd if=/dev/mmcblk1 bs=512 skip=1875968 count=256 2>/dev/null | tr '\0' '\n' | grep -aE "^bootcmd=|^start_autoscript="
+```
+
+A diferença apareceu:
+
+| | B13 #1 (a do resto deste diário) | B13 #2 (esta sessão) |
+|---|---|---|
+| `bootcmd` | `run start_autoscript; run storeboot` | `run storeboot` |
+| `start_autoscript` | existe | **não existe** |
+| `start_emmc_autoscript` | existe (era o nosso alvo) | **não existe** |
+| eMMC total | terminava em setor 30785535 | 30535680 setores (menor) |
+| bootloader version | (não anotado) | `01.01.230625.105202` |
+
+Ambas são `board_name=sc2_ah212`, codename `ohm`, S905X4. Mas o `bootcmd` é
+diferente. **Na variante B, configurar `start_emmc_autoscript` é inócuo** — nada
+invoca essa variável, porque o `bootcmd` nem chama o `start_autoscript`.
+
+**A correção pra variante B**: sobrescrever o próprio `bootcmd`:
+```
+bootcmd = if fatload mmc 1:6 1020000 emmc_autoscript; then autoscr 1020000; fi; run storeboot
+```
+(mantendo `run storeboot` como fallback, pra não perder o caminho original).
+
+Lição: **antes de aplicar o método, leia o `bootcmd` real da placa.** O
+`instalar.sh` v2 faz isso e escolhe o alvo (`start_emmc_autoscript` na variante
+A, `bootcmd` na variante B) automaticamente.
+
+### 16.2 Por que o sem-UART falhou nas primeiras tentativas (momento do saveenv)
+
+A ideia do sem-UART é fazer o `setenv` + `saveenv` de dentro do u-boot vendor,
+disparado por um script no pendrive (o env do vendor é proprietário e o
+`fw_setenv` do Linux não consegue nem lê-lo — confirmado nesta sessão de novo:
+`fw_printenv` retornou "Cannot read environment").
+
+A primeira tentativa patcheou o **`bootscript`** do pendrive. Falhou, e a razão
+é sutil: o devmfc encadeia os scripts assim:
+
+```
+u-boot vendor
+  └─> aml_autoscript   (roda PRIMEIRO; reescreve o bootcmd inteiro em memória:
+                        cmd_boot_get_order, cmd_boot_emmc, boot_order, etc)
+       └─> bootscript  (roda DEPOIS; faz o boot real do kernel)
+```
+
+Quando o patch estava no `bootscript`, o `saveenv` rodava **depois** de o
+`aml_autoscript` já ter poluído o `bootcmd` em memória com o multiboot do
+devmfc. Resultado: o env gravado ficava com
+`bootcmd=run cmd_boot_get_order; ...` em vez do nosso — e esse multiboot procura
+o sistema em `mmc 1:1, 1:2, 1:1b, 1:1c`, nunca na factory (1:6). Trava na logo.
+
+**A correção**: patchear o **topo do `aml_autoscript`**, não o `bootscript`. No
+topo do `aml_autoscript` o env em memória ainda está limpo (o `bootcmd` original
+ainda é `run storeboot`). O `saveenv` ali grava o env correto. Validado
+inspecionando o script compilado: nosso `saveenv` fica na linha ~5, e o devmfc
+só reescreve o `bootcmd` na linha ~26 — gravamos antes da poluição.
+
+O patch também neutraliza os `saveenv` condicionais do próprio devmfc
+(`onetime_boot_order`, `bootfromnand`) pra garantir que nada regrave o env
+depois do nosso.
+
+### 16.3 As mensagens do u-boot só saem pela UART
+
+Um detalhe que causou confusão: o patch tem `echo "AmlBoot: gravando env"`, mas
+**isso nunca aparece no HDMI** — durante todo o u-boot a tela mostra a logo da
+BTV. O texto do u-boot sai apenas pela serial (UART). Então "não vi a mensagem"
+não significava que o patch falhou.
+
+Solução: o `verificar.sh`, que confere o resultado **pelo Linux** (relendo o env
+gravado no eMMC) em vez de depender da tela. Rode-o depois da reinicialização
+pelo pendrive e antes de remover o pendrive — ele diz em verde/vermelho/amarelo
+se o env ficou certo.
+
+### 16.4 Ajustes técnicos que a imagem nova (6.18.40 Minimal) exigiu
+
+- **`parted` no lugar de `sfdisk`**: a imagem Minimal do devmfc 6.18.40 não traz
+  `sfdisk` (nem `fdisk`) — só `parted`. O particionamento foi reescrito com
+  `parted --align none unit s`, que respeita os setores exatos (2764800 e
+  6057984). Confirma-se com leitura de `/sys/block/mmcblk1/mmcblk1pN/start`.
+- **Fim de partição dinâmico**: como o eMMC das duas unidades tem tamanho
+  diferente, o fim da rootfs passou a ser calculado como
+  `$(cat /sys/block/mmcblk1/size) - 34`, em vez de um valor fixo. Resolve a
+  incompatibilidade e adapta a qualquer tamanho de eMMC.
+- **Validação de offsets pós-particionamento**: o script confere que a p1 ficou
+  em 2764800 e a p2 em 6057984 e **aborta** se não — rede de segurança contra o
+  parted "arredondar" e quebrar o truque dos offsets.
+- **Auto-instalação de ferramentas**: o script instala `parted`, `dosfstools`,
+  `e2fsprogs`, `rsync`, `u-boot-tools` se faltarem (precisa de ethernet).
+- **`emmc_autoscript` com fallback de partição**: tenta `mmc 1:1` e `mmc 1:15`,
+  cobrindo as duas numerações que o u-boot pode usar, sem depender de ver a
+  saída UART pra saber qual.
+
+### 16.5 O fluxo v2 final (o que o pendrive faz)
+
+1. Live boota do pendrive; roda-se `instalar.sh`.
+2. Detecta a variante (lê o `bootcmd`), faz backups, particiona/formata/copia o
+   sistema, grava o `emmc_autoscript` na factory, e patcheia o `aml_autoscript`
+   do pendrive conforme a variante.
+3. Reinicia-se pelo pendrive uma vez → o u-boot roda o `aml_autoscript`
+   patcheado → `saveenv` grava o env correto (no formato nativo do vendor).
+4. `verificar.sh` confirma que o env ficou certo.
+5. Remove o pendrive, liga → Debian do eMMC em ~5 s.
+
+Nenhuma etapa exige UART. O acesso serial continua sendo a melhor ferramenta de
+**diagnóstico** (e é o único jeito de ver as mensagens do u-boot), mas não é mais
+necessário pra instalar.
+
+### 16.6 Nota sobre a E13 (S905W2), do histórico
+
+Antes de toda a jornada da B13, houve uma tentativa na BTV E13 (S905W2, Meson
+S4). Registrado aqui pra referência de quem tiver essa placa:
+
+- **Chip WiFi**: SDIO_ID `3030:3030` (`MODALIAS=sdio:c07v3030d3030`) — ID
+  genérico/proprietário, sem vendor reconhecível. Nem o CoreELEC habilitou.
+  Caso perdido no mainline.
+- **eMMC quebrado no mainline**: `switch to bus width 8/4 failed`,
+  `unable to read partition table on mmcblk1`. O controller eMMC do S905W2 não
+  é suportado → instalação interna inviável; roda só do pendrive.
+- **CoreELEC funciona** (mediacenter) via toothpick + renomear
+  `s4_s905w2_2g.dtb` → `dtb.img`. Mas Debian/Armbian não bootam do eMMC.
+- **Decisão**: E13 abandonada em favor da B13 (S905X4), que tem eMMC funcional,
+  GPU Panfrost, e suporte mainline maduro. O método deste diário pode ser
+  revisitado na E13 quando o suporte à família S4 amadurecer.
+
+
+---
+
+*Fim do diário — v2.0 (método sem-UART).*
