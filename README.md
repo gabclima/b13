@@ -1,6 +1,12 @@
-# AmlBoot B13
+<h1 align="center">AmlBoot B13</h1>
 
-> Debian 13 autônomo no eMMC interno de uma BTV B13 (Amlogic S905X4).
+<p align="center">
+  <img src="imagens/topo.png" width="320" alt="BTV B13">
+</p>
+
+<p align="center">
+  <b>Debian 13 autônomo no eMMC interno de uma BTV B13 (Amlogic S905X4).</b>
+</p>
 
 Engenharia reversa do bootloader vendor de uma TV Box BTV B13 pra rodar Debian
 13 + XFCE direto do eMMC interno — sem pendrive, sem toothpick, ligar e usar.
@@ -17,6 +23,7 @@ soldar pinos nem usar ESP32.
 | **[`DIARIO.md`](DIARIO.md)** | Diário técnico completo: processo, descobertas, benchmarks, lições |
 | **[Releases](https://github.com/gabclima/b13/releases)** | `amlboot-b13-v2.zip` — o instalador + scripts |
 | `scripts/` | Arquivos auxiliares (configs, scripts u-boot, sketch ESP32) |
+| `imagens/` | Fotos do hardware (carcaça, placa) e screenshots AIDA64 |
 
 ## Começar rápido
 
@@ -45,20 +52,47 @@ soldar pinos nem usar ESP32.
 - ❌ Bluetooth (mesmo chip — controle remoto da B13 é BT, não funciona)
 - ❌ Áudio HDMI (driver meson-aiu parcial)
 
-## As duas variantes de firmware
+## O hardware
 
-Ao testar em unidades diferentes, descobrimos que **existe mais de uma versão do
-u-boot vendor da B13**, com `bootcmd` diferente:
+<table>
+<tr>
+<td align="center"><img src="imagens/topo.png" width="350" alt="Carcaça topo"></td>
+<td align="center"><img src="imagens/placafundo.png" width="350" alt="Placa verso"></td>
+</tr>
+<tr>
+<td align="center"><sub>Carcaça (topo)</sub></td>
+<td align="center"><sub>Placa (verso)</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="imagens/fundo.png" width="350" alt="Carcaça verso"></td>
+<td align="center"><img src="imagens/placafrente.png" width="350" alt="Placa frente"></td>
+</tr>
+<tr>
+<td align="center"><sub>Carcaça (verso — RESET e UPDATE)</sub></td>
+<td align="center"><sub>Placa (frente — SoC, RAM, eMMC)</sub></td>
+</tr>
+</table>
 
-| | Variante A | Variante B |
-|---|---|---|
-| `bootcmd` | `run start_autoscript; run storeboot` | `run storeboot` |
-| Alvo pra boot do eMMC | `start_emmc_autoscript` | o próprio `bootcmd` |
+### Identificação via AIDA64 (no Android original)
 
-O `instalar.sh` **detecta a variante automaticamente** e aplica o método certo.
-Quem tinha só a variante A documentada e usasse o método antigo numa placa
-variante B travaria na logo — por isso a detecção é importante. Detalhes no
-`DIARIO.md`.
+<table>
+<tr>
+<td align="center" width="50%"><img src="imagens/sistemab13.png" width="400" alt="AIDA64 Sistema"></td>
+<td align="center" width="50%"><img src="imagens/processadorb13.png" width="400" alt="AIDA64 Processador"></td>
+</tr>
+<tr>
+<td align="center"><sub>Sistema</sub></td>
+<td align="center"><sub>Processador (S905X4, 4× A55)</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="imagens/telab13.png" width="400" alt="AIDA64 GPU"></td>
+<td align="center"><img src="imagens/dispositivosb13.png" width="400" alt="AIDA64 USB"></td>
+</tr>
+<tr>
+<td align="center"><sub>GPU (Mali-G31)</sub></td>
+<td align="center"><sub>Dispositivos USB</sub></td>
+</tr>
+</table>
 
 ## Hardware testado
 
@@ -73,6 +107,21 @@ variante B travaria na logo — por isso a detecção é importante. Detalhes no
 | Storage | 16 GB eMMC Samsung KLMAG1JETD (tamanho exato varia entre unidades) |
 | Ethernet | 100 Mbps (hardware limit) |
 | WiFi/BT | Unisoc UWE5621DS (não funciona no Debian mainline) |
+
+## As duas variantes de firmware
+
+Ao testar em unidades diferentes, descobrimos que **existe mais de uma versão do
+u-boot vendor da B13**, com `bootcmd` diferente:
+
+| | Variante A | Variante B |
+|---|---|---|
+| `bootcmd` | `run start_autoscript; run storeboot` | `run storeboot` |
+| Alvo pra boot do eMMC | `start_emmc_autoscript` | o próprio `bootcmd` |
+
+O `instalar.sh` **detecta a variante automaticamente** e aplica o método certo.
+Quem tinha só a variante A documentada e usasse o método antigo numa placa
+variante B travaria na logo — por isso a detecção é importante. Detalhes no
+`DIARIO.md`.
 
 ## Casos de uso
 

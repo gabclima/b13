@@ -58,6 +58,27 @@ caso (um erro na gravação do u-boot que impeça o boot). O procedimento está 
 
 > Sem esse backup, um erro grave pode deixar a TV box inutilizável. **Faça.**
 
+### Confirme que é mesmo uma B13 (S905X4)
+
+Instale o **AIDA64** no Android original e confira o SoC. Deve bater com:
+
+<table>
+<tr>
+<td align="center" width="50%"><img src="imagens/sistemab13.png" width="380" alt="AIDA64 Sistema"></td>
+<td align="center" width="50%"><img src="imagens/processadorb13.png" width="380" alt="AIDA64 Processador"></td>
+</tr>
+<tr>
+<td align="center"><sub>Sistema — board <code>sc2_ah212</code></sub></td>
+<td align="center"><sub>Processador — Amlogic S905X4, 4× Cortex-A55</sub></td>
+</tr>
+</table>
+
+Fisicamente, a placa da B13 é assim (o SoC é o chip preto grande no centro):
+
+<p align="center">
+  <img src="imagens/placafrente.png" width="450" alt="Placa da B13 (frente)">
+</p>
+
 ---
 
 ## Fase 1 — Pendrive Devmfc Debian
@@ -92,6 +113,17 @@ box=s905x4_generic
 perfil gigabit causa problemas de rede.
 
 ### 1.4 Confirme que o live boota (recomendado)
+
+O botão **UPDATE** fica embaixo da TV box, num furo pequeno dentro do conector
+AV (você aperta com o palito). Vire a B13 de cabeça pra baixo pra localizar:
+
+<p align="center">
+  <img src="imagens/fundo.png" width="450" alt="Verso da carcaça mostrando RESET e UPDATE">
+</p>
+
+<p align="center">
+  <sub>Verso da B13. Os furos pequenos (~2 mm) são o RESET e o UPDATE.</sub>
+</p>
 
 Antes de mexer no AmlBoot, vale um teste "seco": plugue o pendrive na B13,
 aperte UPDATE com o palito e ligue. O Debian live deve subir e pedir login
@@ -297,9 +329,30 @@ saem pela serial), o acesso UART é a ferramenta de diagnóstico definitiva.
 
 Resumo (detalhes completos no `DIARIO.md`):
 
-1. Solde pinos nos 4 pads UART (GND/TX/RX/3V3) — do lado das USBs.
+1. Solde pinos nos 4 pads UART (GND/TX/RX/3V3) — do lado das USBs. Como os pads
+   vêm só com furos, você solda um header macho de 4 pinos (padrão Arduino):
+
+<table>
+<tr>
+<td align="center"><img src="imagens/soldab13.jpg" width="280" alt="Pads UART com solda"></td>
+<td align="center"><img src="imagens/pinossoldadosb13.jpg" width="280" alt="Pinos macho instalados"></td>
+</tr>
+<tr>
+<td align="center"><sub>Solda nos 4 pads (GND/TX/RX/3V3, de cima pra baixo)</sub></td>
+<td align="center"><sub>Pinos macho prontos pra receber jumpers</sub></td>
+</tr>
+</table>
+
 2. Use um ESP32 como adaptador USB-serial (sketch `esp32-uart-bridge.ino` no
    zip). Ligação: ESP32 GND↔BTV GND, GPIO16↔BTV TX, GPIO17↔BTV RX. 115200 baud.
+
+<p align="center">
+  <img src="imagens/esp32uart.jpg" width="450" alt="Setup do ESP32 conectado à B13">
+</p>
+
+<p align="center">
+  <sub>Setup completo: B13 com jumpers ligando a UART ao ESP32, ESP32 no PC via USB.</sub>
+</p>
 3. Ligue a B13, interrompa o autoboot pra cair no prompt (`sc2_ah212#`).
 4. Descubra a variante:
    ```
