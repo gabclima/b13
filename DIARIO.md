@@ -1,6 +1,7 @@
 # Diário Técnico — AmlBoot B13
 
 > Engenharia reversa do bootloader vendor de uma TV Box BTV B13 (Amlogic S905X4) pra rodar Debian 13 autônomo do eMMC interno, mais otimizações da stack gráfica, benchmarks de servidor e diagnóstico do chip wifi.
+aaaa
 >
 > **Autor:** Gabriel Lima
 > **Data:** 15 de maio de 2026 (sessão principal) / atualizado em 18 de maio
