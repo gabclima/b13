@@ -1,0 +1,16 @@
+[Unit]
+Description=BTV B13: valor do Android para o registrador PRG_ETH0 (ajuste de tempo RX do RMII)
+# O DTB generico (meson-sc2-ah212-generic.dtb) deixa PRG_ETH0 (0xfe024000) em 0x1e04: link sobe,
+# TX funciona, mas 10-50% dos pacotes recebidos somem sem erro. O DTB do Android usa
+# mc_val = <0x4be0c> (ADJ_ENABLE bit 13 + ADJ_DELAY=9): 0% de perda.
+# Precisa de iomem=relaxed no kernel (bootargs14=iomem=relaxed no /boot/boot.config).
+After=sys-subsystem-net-devices-eth0.device
+Wants=sys-subsystem-net-devices-eth0.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/regs write 0xfe024000 0x4be0c
+
+[Install]
+WantedBy=multi-user.target
