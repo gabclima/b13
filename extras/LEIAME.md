@@ -81,3 +81,16 @@ O kernel do devmfc tem `CONFIG_RT_GROUP_SCHED=y`: sob o systemd nenhum cgroup te
 real, então `SCHED_FIFO` é recusado (o áudio estala sem parar). Adicione
 `bootargs15=rt_group_sched=0` ao `/boot/boot.config`. Todas as interrupções caem na CPU0, então
 fixe o processo de áudio em outra (`CPUAffinity=3` no serviço).
+
+## 4. HDMI preto depois do logo
+
+Sintoma: com o HDMI ligado desde o boot, a tela fica preta depois do logo; plugando o cabo com a
+B13 já ligada, aparece o console. O vídeo é do `meson-drm` (não simplefb), e o driver
+`meson-s4-dw-hdmi` tem dois problemas nesta placa:
+- não lê o estado do hot-plug no boot (só detecta o evento de plugar), então o kernel manda o
+  console para a saída composta (AV) e deixa o HDMI desligado;
+- 1080p não dá imagem (o kernel acha que está tudo certo, mas a TV fica preta), mesmo refazendo o
+  modeset. 1024x768 funciona.
+
+Correção, em `/boot/boot.config`: `bootargs13=video=HDMI-A-1:1024x768@60e` (o `e` força a saída
+ligada mesmo sem hot-plug). Com o HDMI conectado no boot o EDID é lido normalmente.
