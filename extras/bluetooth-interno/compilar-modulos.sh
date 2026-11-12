@@ -31,6 +31,10 @@ cp "$WORK/utsrelease.h" "$K/include/generated/utsrelease.h"
 test -x "$K/scripts/mod/modpost" && test -x "$K/scripts/basic/fixdep"
 
 git clone -q "$DRIVER_REPO" "$WORK/drv" && git -C "$WORK/drv" checkout -q "$DRIVER_COMMIT"
+# O porte deixou dois printk(KERN_ERR "DBG: ... dispatch") por pacote SDIO: inundam o console e o
+# log do kernel (e custam CPU no console do framebuffer). Remove os dois.
+sed -i -E 's/printk\(KERN_ERR "DBG: (TX|RX) dispatch[^;]*\);[[:space:]]*//' "$WORK/drv/unisocwcn/sdio/sdiohal_common.c"
+! grep -q 'DBG: [TR]X dispatch' "$WORK/drv/unisocwcn/sdio/sdiohal_common.c"
 M="make -C $K CC=gcc-13 HOSTCC=gcc-13 ARCH=arm64"
 # BSP: variante Amlogic do UWE5621; o firmware vem de /lib/firmware/wcnmodem.bin.
 (cd "$WORK/drv/unisocwcn" && $M M="$PWD" CFG_AML_WIFI_DEVICE_UWE5621=y modules)
