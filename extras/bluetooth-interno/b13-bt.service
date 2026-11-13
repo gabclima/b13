@@ -1,0 +1,14 @@
+[Unit]
+Description=BTV B13 internal Bluetooth (UWE5621DS): driver, firmware, vendor init, H:4 attach
+After=b13-tune.service
+Before=bluetooth.service ble-midi-reconnect.service
+
+[Service]
+ExecStart=/usr/local/lib/b13-bt/b13-bt-up.sh
+# On a stop, the proxy and modules stay; a restart re-runs the vendor init on the powered chip.
+KillMode=mixed
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
